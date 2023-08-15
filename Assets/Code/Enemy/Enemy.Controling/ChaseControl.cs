@@ -7,10 +7,10 @@ namespace SpaceGame.Enemy.Controling
 {
     public class ChaseControl : MonoBehaviour
     {
-        [SerializeField] private ChaseEnemy[] enemyArray;
+        [SerializeField] private EnemyMove_Chase[] enemyArray;
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            foreach (ChaseEnemy enemy in enemyArray)
+            foreach (EnemyMove_Chase enemy in enemyArray)
             {
                 enemy.chase = true;
             }
@@ -20,7 +20,7 @@ namespace SpaceGame.Enemy.Controling
         {
             if (collision.CompareTag("Player"))
             {
-                foreach (ChaseEnemy enemy in enemyArray)
+                foreach (EnemyMove_Chase enemy in enemyArray)
                 {
                     enemy.chase = false;
                 }

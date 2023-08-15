@@ -1,82 +1,46 @@
 using System.Collections;
 using UnityEngine;
-using SpaceGame.Core;
-using SpaceGame.NotImportant;
+using UnityEngine.Events;
 
 namespace SpaceGame.Enemy
 {
-    public class EnemyHealth: MonoBehaviour, IDamagable
+    public class EnemyHealth: MonoBehaviour
     {
-        [HideInInspector] public float thrust = 5;
-        [HideInInspector] public int damage = 40;
-        [HideInInspector] public bool doKnockBack = true;
-        [HideInInspector] public GameObject deathEffect;
-        [HideInInspector] public bool isAlive;
+        [SerializeField] private int currentHealth, maxHealth;
+        [SerializeField] private float delayOfDeath;
+        [SerializeField] private bool isDead;
 
-        private Animator animator;
-        private Rigidbody2D rb;
-        private int startHealth;
+        public UnityEvent<GameObject> OnHitWithRefrence, OnDeathWithRefrence;
 
-        public UnitHealth _EnemyHealth = new UnitHealth(1, 1);
-
-        private void Start()
+        public void Start()
         {
-            animator = GetComponent<Animator>();
-            rb = GetComponent<Rigidbody2D>();
-            isAlive = true;
-
-            startHealth = _EnemyHealth.Health;
+            currentHealth = maxHealth;
+            isDead = false;
         }
 
-        private void OnTriggerEnter2D(Collider2D hitInfo)
+        public void GetHit(int amount, GameObject sender)
         {
-            if (hitInfo.CompareTag("Player") && isAlive)
-            {
-                isAlive = false;
-                GameManager.gameManager._PlayerHealth.DmgUnit(damage);
-                _EnemyHealth.DmgUnit(damage);
-            }
+            if (isDead)
+                return;
 
-            if (_EnemyHealth.Health < startHealth)
+            currentHealth -= amount;
+             
+            if(currentHealth > 0)
             {
-                KnockBack(transform, hitInfo.transform);
+                OnHitWithRefrence?.Invoke(sender);
             }
-
-            if (_EnemyHealth.Health <= 0)
+            else
             {
-                StartCoroutine(Die());
+                OnDeathWithRefrence?.Invoke(sender);
+                StartCoroutine(Reset());
             }
-
         }
 
-        private void OnBecameInvisible()
+        private IEnumerator Reset()
         {
+            yield return new WaitForSeconds(delayOfDeath);
+            isDead = true;
             Destroy(gameObject);
         }
-
-        private IEnumerator Die()
-        {
-            isAlive = false;
-            animator.Play("DeathEffect");
-            yield return new WaitForSeconds(1);
-
-            Destroy(gameObject);
-            //objectPooler.SpawnFromPool("dropLoot", transform.position + new Vector3(Random.Range(0, 3), Random.Range(0, 3)), Quaternion.identity);
-
-            Instantiate(deathEffect, transform.position, Quaternion.identity);
-        }
-
-        private void KnockBack(Transform me, Transform him)
-        {
-            Vector2 difference = me.position - him.position;
-            difference = difference.normalized * thrust;
-            rb.AddForce(difference, ForceMode2D.Impulse);
-        }
-
-        public void TakeDamage(int damege)
-        {
-            _EnemyHealth.DmgUnit(damege);
-        }
-
     }
 }

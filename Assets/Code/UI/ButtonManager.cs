@@ -1,96 +1,94 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using SpaceGame.Core;
-using SpaceGame.Core.SaveSystem;
+using SpaceGame.SaveSystem;
+using SpaceGame.Stats.Units;
 
 namespace SpaceGame.UI
 {
-    public class ButtonManager : MonoBehaviour
+    public class ButtonManager : MonoBehaviour, IDataPersistence
     {
-        private SceneFader sceneFader;
+        [SerializeField] private UnitTime unitTime;
+        private bool isTransitioning = false;
+        private int levelReached;
 
-        [Header("UI")]
-        [SerializeField] private GameObject pauseMenu;
-        [SerializeField] private GameObject healthVisual;
-
-        [Header("Buttons")]
-        [SerializeField] private Button continueButton;
-        [SerializeField] private Button[] ButtonsMenu;
-
-        private void Start()
+        private void Awake()
         {
-            if (SceneManager.GetActiveScene().name == "Menu" && !DataPersistatenceManager.dataPersistatence.HasGameData())
-            {
-                continueButton.interactable = false;
-            }
+            SceneManager.sceneLoaded += IsTransitioningEvent;
 
-            sceneFader = GetComponent<SceneFader>();
+            void IsTransitioningEvent(Scene arg0, LoadSceneMode arg1) => isTransitioning = false;
         }
+
+        #region save
+        public void LoadData(GameData data)
+        {
+            levelReached = data.LevelReached;
+        }
+
+        public void SaveData(GameData data)
+        {
+            data.LevelReached = levelReached;
+        }
+        #endregion
 
         public void NextLevel()
         {
-            Time.timeScale = 1f;
+            if (isTransitioning)
+                return;
 
-            DisableButtons();
-            sceneFader.FadeOut(SceneManager.GetActiveScene().buildIndex + 1);
-        }
+            isTransitioning = true;
+            unitTime.TimeScale = 1f;
 
-        public void Restart()
-        {
-            Time.timeScale = 1f;
-
-            sceneFader.FadeOut(SceneManager.GetActiveScene().name);
-        }
-
-        public void BackToMainMenu()
-        {
-            Time.timeScale = 1f;
-
-            DisableButtons();
-            sceneFader.FadeOut("Menu");
+            int nextLevelNum = SceneManager.GetActiveScene().buildIndex + 1;
+            SceneFader.sceneFader.FadeOut(nextLevelNum);
+            levelReached = nextLevelNum;
         }
 
         public void NewGame()
         {
-            DisableButtons();
-            OutMenu();
+            if (isTransitioning)
+                return;
+
+            isTransitioning = true;
 
             // create a new game - which will initialize our game data
             DataPersistatenceManager.dataPersistatence.NewGame();
 
             // Load the gameplay scene - which will in turn save the game because of
             // OnSceneUnloaded() in the DataPersistatenceManager
-            sceneFader.FadeOut("Level 1");
+            SceneFader.sceneFader.FadeOut("Level 1");
         }
 
-        public void Select(int i)
+        public void BackToMainMenu()
         {
-            DisableButtons();
-            OutMenu();
-            sceneFader.FadeOut("Level " + i);
+            if (isTransitioning)
+                return;
+
+            SceneFader.sceneFader.FadeOut("Menu");
         }
+
+        public void Restart()
+        {
+            if (isTransitioning)
+                return;
+
+            isTransitioning = true;
+
+            unitTime.TimeScale = 1f;
+            SceneFader.sceneFader.FadeOut(SceneManager.GetActiveScene().name);
+        }
+
 
         public void QuitGame()
         {
-            DisableButtons();
+            if (isTransitioning)
+                return;
+
+            isTransitioning = true;
+
             Application.Quit();
         }
 
-        #region just for some help
-
-        private void DisableButtons()
-        {
-            foreach (var Button in ButtonsMenu)
-            {
-                Button.interactable = false;
-            }
-        }
-        private void OutMenu()
-        {
-            pauseMenu.SetActive(false);
-            healthVisual.SetActive(true);
-        }
-        #endregion
     }
 }

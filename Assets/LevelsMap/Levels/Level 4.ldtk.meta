@@ -1,0 +1,41 @@
+fileFormatVersion: 2
+guid: 6c0f4f9e4f368444da27c3c9b5606964
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: aaa16bfc62c086f4fb45da87b6acf9b1, type: 3}
+  _reimportOnDependencyChange: 1
+  _jsonFile: {fileID: -164016180542632921, guid: 25acc7e8e8eb8bb4b94abb647c20c91e, type: 3}
+  _pixelsPerUnit: 16
+  _atlas: {fileID: 4343727234628468602, guid: 6ce5a39305e7df74da7f9b6d089ecabf, type: 2}
+  _customLevelPrefab: {fileID: 3615140374856582108, guid: 4b84f6fe5dd2c15428c19e56c1e9996a, type: 3}
+  _deparentInRuntime: 0
+  _intGridValueColorsVisible: 0
+  _useCompositeCollider: 1
+  _createBackgroundColor: 1
+  _createLevelBoundsTrigger: 1
+  _intGridValues:
+  - _key: SandSpike_1
+    _asset: {fileID: 11400000, guid: c8c11400f2cc90648b8ec72cea00497c, type: 2}
+  - _key: Ground_1
+    _asset: {fileID: 11400000, guid: 7229683be889c104fb0a9cf0bf33953e, type: 2}
+  - _key: Ground_2
+    _asset: {fileID: 11400000, guid: 495c2447366eead46b7e575e36b2c0fc, type: 2}
+  - _key: Ground_3
+    _asset: {fileID: 11400000, guid: 7229683be889c104fb0a9cf0bf33953e, type: 2}
+  - _key: Water_1
+    _asset: {fileID: 11400000, guid: cc7b125fe61d5de479cc0c66d071ad1c, type: 2}
+  _entities:
+  - _key: Room_Camera
+    _asset: {fileID: 5779150708869665937, guid: 600d64e5c0dbae343b487386904830d5, type: 3}
+  - _key: PlayerSpawnPoint
+    _asset: {fileID: 2688748995352306964, guid: 3dd5752ed3227914b82bc7f84b3389d3, type: 3}
+  - _key: Exit
+    _asset: {fileID: 7141988119168037757, guid: e16ce2ad896a2ff43b635a1d3643f248, type: 3}
+  _enumGenerate: 0
+  _enumPath: 
+  _enumNamespace: 

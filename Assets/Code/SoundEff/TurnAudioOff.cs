@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpaceGame
+namespace SpaceGame.SoundEffectMangement
 {
     public class TurnAudioOff : MonoBehaviour
     {

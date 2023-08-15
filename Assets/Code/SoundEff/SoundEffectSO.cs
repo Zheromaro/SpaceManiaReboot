@@ -1,7 +1,7 @@
 using UnityEngine;
-using SpaceGame.Core.ObjectPooling;
+using SpaceGame.ObjectPooling;
 
-namespace SpaceGame
+namespace SpaceGame.SoundEffectMangement
 {
     [CreateAssetMenu(fileName = "NewSoundEffect",menuName = "Audio/New Sound Effect")]
     public class SoundEffectSO : ScriptableObject

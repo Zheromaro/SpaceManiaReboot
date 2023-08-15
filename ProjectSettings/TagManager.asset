@@ -4,18 +4,15 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - DropLoot
-  - Wall
-  - Enemy
-  - SpeedUp
+  - Water
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - NoAcend
   - Water
   - UI
-  - Enemy
+  - Acend
   - 
   - 
   - 

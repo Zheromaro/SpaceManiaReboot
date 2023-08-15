@@ -1,95 +1,94 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using SpaceGame.Core;
-using SpaceGame.Core.SaveSystem;
+using UnityEngine.Events;
+using SpaceGame.Stats.Units;
 
 namespace SpaceGame.Player
 {
-    public class Player_Movement : MonoBehaviour, IDataPersistence
+    public class Player_Movement : MonoBehaviour
     {
-        #region GetTheComponent
 
-        private InputAction Input_Move;
-        private Rigidbody2D rb;
-        private Animator animator;
-        #endregion
-
-        #region movement
-
-        [Space(8)]
-        [Header("ForMovement")]
-        [HideInInspector] public Vector2 movement;
-        [HideInInspector] public float Manual = 1f;
-        public bool freeHorizontalMovement = false;
-        public bool freeVerticalMovement = true;
-        private float x;
-        private float y;
-        #endregion
-
-        #region speed
-
-        [Space(8)]
-        public float speed;
-        [SerializeField] private float plusAmount;
-        [SerializeField] private float minusAmount;
-
-        private float checkForSpeed;
-        #endregion
-
-        //------------------------------------------------------------------
+        [SerializeField] private float _waitBeforeChangingStatefor = 0.07f;
+        [SerializeField] private string[] ZeroGravityTags;
+        [SerializeField] private UnityEvent OnWater, OnAir;
+        private int _waterCeles = 0;
+        private State_Move move;
+        private State_Swim swim;
+        public static bool inWater = true;
 
         private void Awake()
         {
-            rb = GetComponent<Rigidbody2D>();
-            animator = GetComponent<Animator>();
-            Input_Move = InputManager.inputActions.Player.Movement;
+            move = GetComponent<State_Move>();
+            swim = GetComponent<State_Swim>();
 
-            checkForSpeed = speed;
+            move.enabled = false;
+            swim.enabled = false;
         }
 
-        public void LoadData(GameData data)
+        private void OnDisable()
         {
-            this.transform.position = data.playerPosition;
+            move.enabled = false;
+            swim.enabled = false;
         }
 
-        public void SaveData(GameData data)
+        private void OnEnable()
         {
-            // Nothing...
-        }
-
-        private void Update()
-        {
-            if (freeHorizontalMovement)
-            {
-                movement.x = Input_Move.ReadValue<Vector2>().x;
-            }
+            if (inWater == true)
+                swim.enabled = true;
             else
-            {
-                x = Input_Move.ReadValue<Vector2>().x * plusAmount;
-                movement.x = Manual + x;
-            }
-
-            if (freeVerticalMovement)
-            {
-                movement.y = Input_Move.ReadValue<Vector2>().y;
-            }
-            else
-            {
-                y = Input_Move.ReadValue<Vector2>().y * minusAmount;
-                movement.y = Manual + y;
-            }
-
-            animator.SetFloat("Horizontal", movement.x);
-            animator.SetFloat("Vertical", movement.y);
-            animator.SetFloat("Speed", movement.sqrMagnitude);
+                move.enabled = true;
         }
 
-        private void FixedUpdate()
+        private IEnumerator OnTriggerEnter2D(Collider2D hitInfo)
         {
-            if (movement.x > 0.1f || movement.x < -0.1f || movement.y > 0.1f || movement.y < -0.1f)
+            if (!InWater(hitInfo))
+                yield break;
+
+            _waterCeles++;
+
+            if (_waterCeles == 1)
             {
-                rb.AddForce(new Vector2(movement.x * speed, movement.y * speed), ForceMode2D.Impulse);
+                yield return new WaitForSeconds(_waitBeforeChangingStatefor);
+                OnWater?.Invoke();
+                move.enabled = false;
+                swim.enabled = true;
+                inWater = true;
             }
         }
+
+        private IEnumerator OnTriggerExit2D(Collider2D hitInfo)
+        {
+            if (!InWater(hitInfo))
+                yield break;
+
+            _waterCeles--;
+
+            if (_waterCeles <= 0)
+            {
+                _waterCeles = 0;
+
+                yield return new WaitForSeconds(_waitBeforeChangingStatefor);
+                OnAir?.Invoke();
+                swim.enabled = false;
+                move.enabled = true;
+                inWater = false;
+            }
+        }
+
+        private bool InWater(Collider2D hitInfo)
+        {
+            foreach (string tag in ZeroGravityTags)
+            {
+                if (hitInfo.tag == tag)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 }

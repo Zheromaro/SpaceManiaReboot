@@ -1,3 +1,4 @@
+using SpaceGame.NotImportant;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,25 +7,24 @@ namespace SpaceGame.Enemy.Controling
 {
     public class EnemySpawnManager : MonoBehaviour
     {
-        [SerializeField] private GameObject[] enemyArray;
-        private void OnTriggerEnter2D(Collider2D collision)
+        private List<Transform> enemyArray = new List<Transform>();
+
+        private void Start()
         {
-            foreach (GameObject enemy in enemyArray)
+            foreach (Transform child in transform)
             {
-                if (enemy == null)
-                    return;
-                enemy.SetActive(true);
+                enemyArray.Add(child);
+                child.gameObject.SetActive(false);
             }
         }
 
-        private void OnTriggerExit2D(Collider2D collision)
+        private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.CompareTag("Player"))
+            foreach (Transform enemy in enemyArray)
             {
-                foreach (GameObject enemy in enemyArray)
-                {
-                    enemy.SetActive(false);
-                }
+                if (enemy == null)
+                    return;
+                enemy.gameObject.SetActive(true);
             }
         }
     }

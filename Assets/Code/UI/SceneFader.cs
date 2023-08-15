@@ -1,17 +1,32 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using SpaceGame.Core;
-using SpaceGame.Core.SaveSystem;
-
+using SpaceGame.SaveSystem;
+using SpaceGame.Stats.Units;
+using UnityEngine.Events;
 
 namespace SpaceGame.UI
 {
     public class SceneFader : MonoBehaviour
     {
-        [Header("Fide")]
-        [SerializeField] private Animator animator;
+        public static SceneFader sceneFader { get; private set; }
+
+        [SerializeField] private UnitTime _unitTime;
         [SerializeField] private int WaitFor;
+        [SerializeField] private Animator animator;
+        [SerializeField] private UnityEvent _OnFadeOut;
+
+        private void Awake()
+        {
+            if (sceneFader != null && sceneFader != this)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                sceneFader = this;
+            }
+        }
 
         private void OnEnable()
         {
@@ -23,10 +38,10 @@ namespace SpaceGame.UI
             SceneManager.sceneLoaded -= FadeIn;
         }
 
-        public void FadeIn(Scene scene, LoadSceneMode mode)
+        private void FadeIn(Scene scene, LoadSceneMode mode)
         {
-            Time.timeScale = 1f;
-            animator.Play("Fade_In");
+            _unitTime.TimeScale = 1;
+            animator.Play("Fade in");
         }
 
         public void FadeOut(string scene)
@@ -41,32 +56,32 @@ namespace SpaceGame.UI
 
         private IEnumerator FadeOutMangement(string scene)
         {
-            animator.Play("Fade_Out");
-            DataPersistatenceManager.dataPersistatence.SaveGame();
-
-            yield return new WaitForSeconds(1);
-
-            GameManager.gameManager._PlayerHealth.Health = 100;
-            Time.timeScale = 1f;
+            _unitTime.TimeScale = 1;
 
             yield return new WaitForSeconds(WaitFor);
+            animator.Play("Fade out");
 
+            yield return new WaitForSeconds(1f);
+            DataPersistatenceManager.dataPersistatence.SaveGame();
             SceneManager.LoadSceneAsync(scene);
+
+            _OnFadeOut?.Invoke();
         }
 
         private IEnumerator FadeOutMangement(int i)
         {
-            animator.Play("Fade_Out");
+            animator.Play("Fade out");
             DataPersistatenceManager.dataPersistatence.SaveGame();
 
             yield return new WaitForSeconds(1);
 
-            GameManager.gameManager._PlayerHealth.Health = 100;
-            Time.timeScale = 1f;
+            _unitTime.TimeScale = 1;
 
             yield return new WaitForSeconds(WaitFor);
 
             SceneManager.LoadSceneAsync(i);
+
+            _OnFadeOut?.Invoke();
         }
     }
 }

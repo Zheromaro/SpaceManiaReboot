@@ -1,35 +1,47 @@
+using System.Collections;   
 using UnityEngine;
 using UnityEngine.UI;
-using SpaceGame.Core.SaveSystem;
+using SpaceGame.SaveSystem;
+using SpaceGame.UI;
 
 namespace SpaceGame.UI
 {
     public class LevelSelector : MonoBehaviour, IDataPersistence
     {
-        private int LevelReached;
-
         [SerializeField] private Button[] levelButtons;
+        private static bool isSelecting = false;
 
         private void Start()
         {
-            DataPersistatenceManager.dataPersistatence.LoadGame();
+            if (DataPersistatenceManager.dataPersistatence.HasGameData() == false)
+                transform.parent.gameObject.SetActive(false);
+        }
 
-            
+        #region save
+        public void LoadData(GameData data)
+        {
             for (int i = 0; i < levelButtons.Length; i++)
             {
-                if (i > LevelReached)
+                if (i > data.LevelReached)
                     levelButtons[i].interactable = false;
             }
+
+            isSelecting = false;
+            transform.parent.gameObject.SetActive(false);
         }
 
-        public void LoadData(GameData gameData)
+        public void SaveData(GameData data)
         {
-            LevelReached = gameData.LevelReached;
+            // Nothing to save
         }
+        #endregion
 
-        public void SaveData(GameData gameData)
+        public void Select(int i)
         {
-            gameData.LevelReached = LevelReached;
+            if(!isSelecting)
+                SceneFader.sceneFader.FadeOut("Level " + i);
+
+            isSelecting = true;
         }
     }
 }
